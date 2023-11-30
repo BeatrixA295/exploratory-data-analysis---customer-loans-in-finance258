@@ -50,5 +50,5 @@ print(loaded_data)
 
 loans_df = pd.read_csv('loan_payments_data.csv')
 loans_df.head(10)
-loans_
+loans_df
 # %%
