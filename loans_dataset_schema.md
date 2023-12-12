@@ -1,10 +1,10 @@
 `# Full loans dataset schema
 
-- **id**: unique id of the loan
-- **member_id**: id of the member to took out the loan
-- **loan_amount**: amount of loan the applicant received
-- **funded_amount**: The total amount committed to the loan at the point in time 
-- **funded_amount_inv**: The total amount committed by investors for that loan at that point in time 
+- **id**: unique id of the loan category
+- **member_id**: id of the member to took out the loan int
+- **loan_amount**: amount of loan the applicant received float 
+- **funded_amount**: The total amount committed to the loan at the point in time  float
+- **funded_amount_inv**: The total amount committed by investors for that loan at that point in time
 - **term**: The number of monthly payments for the loan
 - **int_rate**: Interest rate on the loan
 - **instalment**: The monthly payment owned by the borrower
@@ -40,3 +40,16 @@
 - **mths_since_last_major_derog**: Months since most recent 90-day or worse rating
 - **policy_code**: publicly available policy_code=1 new products not publicly available policy_code=2
 - **application_type**: Indicates whether the loan is an individual application or a joint application with two co-borrowers
+
+Numerical
+
+INT -    id, member_id, loan_amount, funded_amount_inv, annual_inc, delinq_2yrs, inq_last_6mths,mths_since_last_delinq, mths_since_last_record,open_accounts, total_accounts,collections_12_ex_med,mths_since,last_major_derog,policy_code
+
+FLOAT - int_rate, instalment,dti, out_prncp, total_payment_inv,total_rec_prncp,total_rec_int,total_rec_late_fees,recoveries,collection_recovery_fee ,last_payment_amount
+
+
+Categorical 
+Ordered - term, grade, sub_grade, employment_length
+
+
+Date = issue_date, earliest_credit_line,last_payment_date,, last_credit_pull_date

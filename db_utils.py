@@ -1,14 +1,11 @@
-#%%
 import yaml
-#%%
 import pandas as pd
-#%%
 import psycopg2
-#%%
 from sqlalchemy import create_engine
-#%%
 import sqlalchemy
-#%%
+import seaborn as sns
+import missingno as msno 
+import matplotlib.pyplot as plt
 with open('credentials.yaml', 'r') as f:
     credentials = yaml.safe_load(f)
 #%%
@@ -49,22 +46,19 @@ loaded_data = loan_data.load_loan_data('loan_payments_data.csv')
 print(loaded_data) 
 
 loans_df = pd.read_csv('loan_payments_data.csv')
-loans_df.head(10)
-loans_df
-
-print(loans_df.dtypes)
-# %%
-
+#%%
 
 class DataTransformer:
     def __init__(self, df):
         self.df = df.copy()  # Create a copy of the DataFrame
         
     def transform_data(self):
-        self._convert_to_datetime(['issue_date', 'earliest_credit_line'])
+        skewed_columns = ['id', 'member_id', 'loan_amount', 'funded_amount_inv', 'annual_inc', 'delinq_2yrs', 'inq_last_6mths','mths_since_last_delinq', 'mths_since_last_record','open_accounts', 'total_accounts','collections_12_ex_med','mths_since','last_major_derog','policy_code', 'int_rate', 'instalment','dti', 'out_prncp', 'total_payment_inv,total_rec_prncp','total_rec_int','total_rec_late_fees','recoveries','collection_recovery_fee' ,'last_payment_amount']
+        date_columns =  ['issue_date', 'earliest_credit_line','last_payment_date',"last_credit_pull_date"]
+        self._convert_to_datetime(date_columns)
         self._extract_numeric_and_convert('employment_length', r'(\d+)')
         self._extract_numeric_and_convert('term', r'(\d+)')
-        self._convert_to_categorical(['verification_status', 'grade', 'sub_grade', 'home_ownership', 'loan_status', 'payment_plan', 'purpose', 'application_type'])
+        self._convert_to_categorical(['grade', 'sub_grade', 'loan_status', 'payment_plan', 'purpose', 'application_type'])
         self._handle_missing_and_convert_to_int(['mths_since_last_delinq', 'mths_since_last_record', 'mths_since_last_major_derog'])
         
     def _convert_to_datetime(self, columns):
@@ -82,40 +76,6 @@ class DataTransformer:
         for col in columns:
             self.df[col] = self.df[col].fillna(0).astype(int) 
             
-
-
-loans_df_transformed = DataTransformer(loans_df)
-loans_df_transformed.transform_data()
-loans_df_transformed._convert_to_datetime()
-loans_df_transformed._extract_numeric_and_convert()
-loans_df_transformed._handle_missing_and_convert_to_int
-            
-            
-class DataFrameInfo:
-    def __init__(self, df):
-        self.df = df.copy()  # Create a copy of the DataFrame
-        
-    def describe_columns(self):
-        return self.df.dtypes
-    
-    def extract_stats(self):
-        return self.df.describe()
-    
-    def count_distinct_values(self):
-        return self.df.select_dtypes(include='category').nunique()
-    
-    def print_shape(self):
-        print("DataFrame shape:", self.df.shape)
-        
-    def count_null_values(self):
-        return self.df.isnull().sum()
-    
-    # Any other custom methods or EDA tasks can be added here
-    
-   #%%
-class DataTransformer2:
-    def __init__(self, df):
-     self.df = df.copy()  # Create a copy of the DataFrame
     def reduce_skewness(self, threshold=1):
         numerical_cols = self.df.select_dtypes(include=['float64', 'int64']).columns
         skewed_cols = self.df[numerical_cols].apply(lambda x: x.skew()).sort_values(ascending=False)
@@ -127,7 +87,106 @@ class DataTransformer2:
             else:
                 self.df[col] = np.sign(self.df[col]) * np.log1p(abs(self.df[col]))
                 
-loans_df_transformed2 = DataTransformer2(loans_df)
-loans_df_transformed2.transform_data()
-    
+#%% 
+class NullPercentageCalculator:
+        def __init__(self, df):
+            self.df = df
 
+        def calculate_null_percentage(self,column):
+            percent_missing = self.df[column].isnull().sum() * 100 / len(self.df)
+            return percent_missing
+
+        def drop_high_null_columns(self, threshold=50):
+            percent_missing = self.df.isnull().sum() * 100 / len(self.df)
+            columns_to_drop = percent_missing[percent_missing > threshold].index.tolist()
+            self.df.drop(columns=columns_to_drop, inplace=True)
+
+        def impute_nulls(self, threshold_low=0, threshold_high=10):
+            percent_missing = self.df.isnull().sum() * 100 / len(self.df)
+            columns_to_impute = percent_missing[
+                (percent_missing > threshold_low) & (percent_missing < threshold_high)
+            ].index.tolist()
+
+            for col in columns_to_impute:
+                if self.df[col].dtype == 'object':
+                    self.df[col].fillna(self.df[col].mode()[0], inplace=True)
+                else:
+                    if abs(self.df[col].skew()) > 1:
+                        self.df[col].fillna(self.df[col].median(), inplace=True)
+                    else:
+                        self.df[col].fillna(self.df[col].mean(), inplace=True)
+
+        def drop_rows_date_columns(self, threshold=0.01):
+            date_columns = ['issue_date', 'earliest_credit_line', 'last_payment_date', "last_credit_pull_date"]
+            for col in date_columns:
+                if col in self.df.columns:
+                    null_percentage = self.df[col].isnull().mean()
+                    if null_percentage > threshold:
+                        self.df.dropna(subset=[col], inplace=True)
+#%%
+class HistogramForSkews:
+    pass
+        
+    
+    
+#%%
+            
+class DataFrameInfo:
+        def __init__(self, df):
+            self.df = df.copy()  # Create a copy of the DataFrame
+            
+        def describe_columns(self):
+            return self.df.dtypes
+        
+        def extract_stats(self):
+            return self.df.describe()
+        
+        def count_distinct_values(self):
+            return self.df.select_dtypes(include='category').nunique()
+        
+        def print_shape(self):
+            print("DataFrame shape:", self.df.shape)
+            
+        def count_null_values(self):
+            return self.df.isnull().sum()
+    
+    # Any other custom methods or EDA tasks can be added here
+class Plotter:
+        @staticmethod
+        def plot_skew(data, threshold=1):
+            skewed_columns = ['id', 'member_id', 'loan_amount', 'funded_amount_inv', 'annual_inc', 'delinq_2yrs', 'inq_last_6mths','mths_since_last_delinq', 'mths_since_last_record','open_accounts', 'total_accounts','collections_12_ex_med','mths_since','last_major_derog','policy_code', 'int_rate', 'instalment','dti', 'out_prncp', 'total_payment_inv,total_rec_prncp','total_rec_int','total_rec_late_fees','recoveries','collection_recovery_fee' ,'last_payment_amount']
+            skewed_columns_threshold = skewed_columns[abs(skewed_columns) > threshold]
+            plt.figure(figsize=(10, 6))
+            for col in skewed_columns.index:
+                sns.histplot(data[skewed_columns], kde=True, bins=50, label=col)
+                plt.legend()
+                plt.xlabel("Categories")
+                plt.ylabel("Level of Skew")
+                plt.title('Skewed Columns')
+                plt.show()
+            
+   #%%
+   # Visualize missing values using missingno
+class MissingValuesVisual:
+    def __init__(self, df):
+        self.df = df
+
+    def show_matrix_before(self):
+        msno.matrix(self.df)
+        plt.title('Missing Values Matrix Before Handling')
+        plt.show()
+
+    def show_heatmap_before(self):
+        msno.heatmap(self.df)
+        plt.title('Missing Values Heatmap Before Handling')
+        plt.show()
+
+    def show_matrix_after(self):
+        msno.matrix(self.df)
+        plt.title('Missing Values Matrix After Handling')
+        plt.show()
+
+    def show_heatmap_after(self):
+        msno.heatmap(self.df)
+        plt.title('Missing Values Heatmap After Handling')
+        plt.show()
