@@ -142,51 +142,56 @@ class DataFrameInfo:
             return self.df.describe()
         
         def count_distinct_values(self):
-            return self.df.select_dtypes(include='category').nunique()
+            return self.df.select_dtypes.nunique()
         
         def print_shape(self):
-            print("DataFrame shape:", self.df.shape)
+            print("DataFrame shape:")
+            return self.df.shape
             
         def count_null_values(self):
             return self.df.isnull().sum()
     
     # Any other custom methods or EDA tasks can be added here
 class Plotter:
-        @staticmethod
-        def plot_skew(data, threshold=1):
-            skewed_columns = ['id', 'member_id', 'loan_amount', 'funded_amount_inv', 'annual_inc', 'delinq_2yrs', 'inq_last_6mths','mths_since_last_delinq', 'mths_since_last_record','open_accounts', 'total_accounts','collections_12_ex_med','mths_since','last_major_derog','policy_code', 'int_rate', 'instalment','dti', 'out_prncp', 'total_payment_inv,total_rec_prncp','total_rec_int','total_rec_late_fees','recoveries','collection_recovery_fee' ,'last_payment_amount']
-            skewed_columns_threshold = skewed_columns[abs(skewed_columns) > threshold]
-            plt.figure(figsize=(10, 6))
-            for col in skewed_columns.index:
-                sns.histplot(data[skewed_columns], kde=True, bins=50, label=col)
-                plt.legend()
-                plt.xlabel("Categories")
-                plt.ylabel("Level of Skew")
-                plt.title('Skewed Columns')
-                plt.show()
+                def __init__(self, df):
+                    self.df = df
+
+                def show_matrix_before(self):
+                    msno.matrix(self.df)
+                    plt.title('Missing Values Matrix Before Handling')
+                    plt.show()
+
+                def show_heatmap_before(self):
+                    msno.heatmap(self.df)
+                    plt.title('Missing Values Heatmap Before Handling')
+                    plt.show()
+
+                def show_matrix_after(self):
+                    msno.matrix(self.df)
+                    plt.title('Missing Values Matrix After Handling')
+                    plt.show()
+
+                def show_heatmap_after(self):
+                    msno.heatmap(self.df)
+                    plt.title('Missing Values Heatmap After Handling')
+                    plt.show()
+
+                @staticmethod
+                def plot_skew(loans_df, threshold=1):
+                    plt.figure(figsize=(10, 6))
+                    skewed_columns = ['id', 'member_id', 'loan_amount', 'funded_amount', 'funded_amount_inv', 'int_rate', 'instalment', 'annual_inc', 'dti', 'delinq_2yrs', 'inq_last_6mths', 'mths_since_last_delinq', 'mths_since_last_record', 'open_accounts', 'total_accounts', 'out_prncp', 'out_prncp_inv', 'total_payment', 'total_payment_inv', 'total_rec_prncp', 'total_rec_int', 'total_rec_late_fee', 'recoveries', 'collection_recovery_fee', 'last_payment_amount', 'collections_12_mths_ex_med', 'mths_since_last_major_derog', 'policy_code']
+                    num_columns = len(skewed_columns)
+                   
+                    for col in skewed_columns:
+                        plt.subplot(1, num_columns, skewed_columns.index(col) + 1)
+                        sns.histplot(loans_df[skewed_columns], kde=True, bins=28, alpha= 0.5, label=[skewed_columns])
+                       
+                       
+                        plt.legend()
+                        plt.xlabel("Categories")
+                        plt.ylabel("Level of Skew")
+                        plt.title('Skewed Columns')
+                        plt.tight_layout()
+                        plt.show()
             
-   #%%
-   # Visualize missing values using missingno
-class MissingValuesVisual:
-    def __init__(self, df):
-        self.df = df
 
-    def show_matrix_before(self):
-        msno.matrix(self.df)
-        plt.title('Missing Values Matrix Before Handling')
-        plt.show()
-
-    def show_heatmap_before(self):
-        msno.heatmap(self.df)
-        plt.title('Missing Values Heatmap Before Handling')
-        plt.show()
-
-    def show_matrix_after(self):
-        msno.matrix(self.df)
-        plt.title('Missing Values Matrix After Handling')
-        plt.show()
-
-    def show_heatmap_after(self):
-        msno.heatmap(self.df)
-        plt.title('Missing Values Heatmap After Handling')
-        plt.show()
