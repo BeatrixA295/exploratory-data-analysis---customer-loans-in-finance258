@@ -48,7 +48,7 @@ print(loaded_data)
 loans_df = pd.read_csv('loan_payments_data.csv')
 #%%
 
-class DataTransformer:
+class DataFrameTransform:
     def __init__(self, df):
         self.df = df.copy()  # Create a copy of the DataFrame
         
@@ -91,6 +91,9 @@ class DataTransformer:
 class NullPercentageCalculator:
         def __init__(self, df):
             self.df = df
+                            
+        def count_null_values(self):
+            return self.df.isnull().sum()
 
         def calculate_null_percentage(self,column):
             percent_missing = self.df[column].isnull().sum() * 100 / len(self.df)
@@ -103,9 +106,7 @@ class NullPercentageCalculator:
 
         def impute_nulls(self, threshold_low=0, threshold_high=10):
             percent_missing = self.df.isnull().sum() * 100 / len(self.df)
-            columns_to_impute = percent_missing[
-                (percent_missing > threshold_low) & (percent_missing < threshold_high)
-            ].index.tolist()
+            columns_to_impute = percent_missing[(percent_missing > threshold_low) & (percent_missing < threshold_high)].index.tolist()
 
             for col in columns_to_impute:
                 if self.df[col].dtype == 'object':
@@ -123,12 +124,7 @@ class NullPercentageCalculator:
                     null_percentage = self.df[col].isnull().mean()
                     if null_percentage > threshold:
                         self.df.dropna(subset=[col], inplace=True)
-#%%
-class HistogramForSkews:
-    pass
-        
-    
-    
+
 #%%
             
 class DataFrameInfo:
@@ -147,15 +143,14 @@ class DataFrameInfo:
         def print_shape(self):
             print("DataFrame shape:")
             return self.df.shape
-            
-        def count_null_values(self):
-            return self.df.isnull().sum()
+
     
     # Any other custom methods or EDA tasks can be added here
+#%%
 class Plotter:
                 def __init__(self, df):
                     self.df = df
-
+                                                        
                 def show_matrix_before(self):
                     msno.matrix(self.df)
                     plt.title('Missing Values Matrix Before Handling')
@@ -167,31 +162,32 @@ class Plotter:
                     plt.show()
 
                 def show_matrix_after(self):
-                    msno.matrix(self.df)
-                    plt.title('Missing Values Matrix After Handling')
-                    plt.show()
+                        msno.matrix(self.df)
+                        plt.title('Missing Values Matrix After Handling')
+                        plt.show()
 
                 def show_heatmap_after(self):
                     msno.heatmap(self.df)
                     plt.title('Missing Values Heatmap After Handling')
                     plt.show()
 
-                @staticmethod
+                
                 def plot_skew(loans_df, threshold=1):
-                    plt.figure(figsize=(10, 6))
-                    skewed_columns = ['id', 'member_id', 'loan_amount', 'funded_amount', 'funded_amount_inv', 'int_rate', 'instalment', 'annual_inc', 'dti', 'delinq_2yrs', 'inq_last_6mths', 'mths_since_last_delinq', 'mths_since_last_record', 'open_accounts', 'total_accounts', 'out_prncp', 'out_prncp_inv', 'total_payment', 'total_payment_inv', 'total_rec_prncp', 'total_rec_int', 'total_rec_late_fee', 'recoveries', 'collection_recovery_fee', 'last_payment_amount', 'collections_12_mths_ex_med', 'mths_since_last_major_derog', 'policy_code']
+                    plt.figure(figsize=(14, 8))  # Adjust the figure size as needed
+                    skewed_columns = [['id', 'member_id', 'loan_amount', 'funded_amount', 'funded_amount_inv', 'int_rate', 'instalment', 'annual_inc', 'dti', 'delinq_2yrs', 'inq_last_6mths', 'mths_since_last_delinq', 'mths_since_last_record', 'open_accounts', 'total_accounts', 'out_prncp', 'out_prncp_inv', 'total_payment', 'total_payment_inv', 'total_rec_prncp', 'total_rec_int', 'total_rec_late_fee', 'recoveries', 'collection_recovery_fee', 'last_payment_amount', 'collections_12_mths_ex_med', 'mths_since_last_major_derog', 'policy_code']]  # Your list of columns
+                    
                     num_columns = len(skewed_columns)
-                   
-                    for col in skewed_columns:
-                        plt.subplot(1, num_columns, skewed_columns.index(col) + 1)
-                        sns.histplot(loans_df[skewed_columns], kde=True, bins=28, alpha= 0.5, label=[skewed_columns])
-                       
-                       
-                        plt.legend()
-                        plt.xlabel("Categories")
-                        plt.ylabel("Level of Skew")
-                        plt.title('Skewed Columns')
-                        plt.tight_layout()
-                        plt.show()
-            
+                    
+                    for idx, col in enumerate(skewed_columns, start=1):
+                        plt.subplot(1, num_columns, idx)
+                        sns.histplot(loans_df[col], kde=True, bins=3000, alpha=0.5)
+                        plt.xlabel("Value")
+                        plt.ylabel("Frequency")
+                        plt.title(f'Skewed Column: {col}')
+                
+                plt.suptitle('Histograms of Skewed Columns', y=1.05)  # Title for the entire plot
+                plt.tight_layout()
+                plt.show()
 
+
+# %%
