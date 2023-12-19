@@ -138,7 +138,10 @@ class DataFrameInfo:
             return self.df.describe()
         
         def count_distinct_values(self):
-            return self.df.select_dtypes.nunique()
+            distinct_values = {}
+            for col in self.df.columns:
+                distinct_values[col] = self.df[col].nunique()
+            return distinct_values   
         
         def print_shape(self):
             print("DataFrame shape:")
@@ -148,46 +151,31 @@ class DataFrameInfo:
     # Any other custom methods or EDA tasks can be added here
 #%%
 class Plotter:
-                def __init__(self, df):
-                    self.df = df
                                                         
-                def show_matrix_before(self):
-                    msno.matrix(self.df)
+                def show_matrix_before(df):
+                    msno.matrix(df)
                     plt.title('Missing Values Matrix Before Handling')
                     plt.show()
 
-                def show_heatmap_before(self):
-                    msno.heatmap(self.df)
+                def show_heatmap_before(df):
+                    msno.heatmap(df)
                     plt.title('Missing Values Heatmap Before Handling')
                     plt.show()
 
-                def show_matrix_after(self):
-                        msno.matrix(self.df)
+                def show_matrix_after(df):
+                        msno.matrix(df)
                         plt.title('Missing Values Matrix After Handling')
                         plt.show()
 
-                def show_heatmap_after(self):
-                    msno.heatmap(self.df)
+                def show_heatmap_after(df):
+                    msno.heatmap(df)
                     plt.title('Missing Values Heatmap After Handling')
                     plt.show()
 
                 
-                def plot_skew(loans_df, threshold=1):
-                    plt.figure(figsize=(14, 8))  # Adjust the figure size as needed
-                    skewed_columns = [['id', 'member_id', 'loan_amount', 'funded_amount', 'funded_amount_inv', 'int_rate', 'instalment', 'annual_inc', 'dti', 'delinq_2yrs', 'inq_last_6mths', 'mths_since_last_delinq', 'mths_since_last_record', 'open_accounts', 'total_accounts', 'out_prncp', 'out_prncp_inv', 'total_payment', 'total_payment_inv', 'total_rec_prncp', 'total_rec_int', 'total_rec_late_fee', 'recoveries', 'collection_recovery_fee', 'last_payment_amount', 'collections_12_mths_ex_med', 'mths_since_last_major_derog', 'policy_code']]  # Your list of columns
-                    
-                    num_columns = len(skewed_columns)
-                    
-                    for idx, col in enumerate(skewed_columns, start=1):
-                        plt.subplot(1, num_columns, idx)
-                        sns.histplot(loans_df[col], kde=True, bins=3000, alpha=0.5)
-                        plt.xlabel("Value")
-                        plt.ylabel("Frequency")
-                        plt.title(f'Skewed Column: {col}')
-                
-                plt.suptitle('Histograms of Skewed Columns', y=1.05)  # Title for the entire plot
-                plt.tight_layout()
-                plt.show()
-
+                def histogram(df, column, bins):
+                    plt.hist(df[column], bins=bins)
+                    plt.tight_layout()
+                    plt.show()
 
 # %%
