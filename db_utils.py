@@ -91,17 +91,16 @@ class NullPercentageCalculator:
         def count_null_values(df):
             return df.isnull().sum()
 
-        def calculate_null_percentage(df, column):
+        def calculate_null_percentage(df, columns):
             columns = df.columns 
-            ['id', 'member_id', 'loan_amount', 'funded_amount', 'funded_amount_inv', 'int_rate', 'instalment', 'annual_inc', 'dti', 'delinq_2yrs', 'inq_last_6mths', 'open_accounts', 'total_accounts', 'out_prncp', 'out_prncp_inv', 'total_payment', 'total_payment_inv', 'total_rec_prncp', 'total_rec_int', 'total_rec_late_fee', 'recoveries', 'collection_recovery_fee', 'last_payment_amount', 'collections_12_mths_ex_med', 'policy_code']
-            
-            percent_missing = df[column].isnull().sum() * 100 / len(df)
+            percent_missing = df[columns].isnull().sum() * 100 / len(df)
             return percent_missing
 
         def drop_high_null_columns(df, threshold=50):
             percent_missing = df.isnull().sum() * 100 / len(df)
             columns_to_drop = percent_missing[percent_missing > threshold].index.tolist()
-            df.drop(columns=columns_to_drop, inplace=True)
+            df.drop(columns = columns_to_drop, inplace=True)
+            return df, columns_to_drop
 
         def impute_nulls(df, threshold_low=0, threshold_high=10):
             percent_missing = df.isnull().sum() * 100 / len(df)
@@ -115,6 +114,7 @@ class NullPercentageCalculator:
                         df[col].fillna(df[col].median(), inplace=True)
                     else:
                         df[col].fillna(df[col].mean(), inplace=True)
+            return df 
                         
         def drop_rows_date_columns(df, threshold=0.01):
             date_columns = ['issue_date', 'earliest_credit_line', 'last_payment_date', "last_credit_pull_date"]
@@ -147,7 +147,7 @@ class DataFrameInfo:
     # Any other custom methods or EDA tasks can be added here
 #%%
 class Plotter:                        
-    
+
     def show_matrix_before(df):
         msno.matrix(df)
         plt.title('Missing Values Matrix Before Handling')
