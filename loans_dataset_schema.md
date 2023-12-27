@@ -1,21 +1,21 @@
 `# Full loans dataset schema
 
-- **id**: unique id of the loan category
+- **id**: unique id of the loan category int
 - **member_id**: id of the member to took out the loan int
 - **loan_amount**: amount of loan the applicant received float 
 - **funded_amount**: The total amount committed to the loan at the point in time  float
 - **funded_amount_inv**: The total amount committed by investors for that loan at that point in time
-- **term**: The number of monthly payments for the loan
-- **int_rate**: Interest rate on the loan
+- **term**: The number of monthly payments for the loan categorical 
+- **int_rate**: Interest rate on the loan float 
 - **instalment**: The monthly payment owned by the borrower
-- **grade**: LC assigned loan grade
-- **sub_grade**: LC assigned loan sub grade
-- **employment_length**: Employment length in years.
-- **home_ownership**: The home ownership status provided by the borrower
-- **annual_inc**: The annual income of the borrower
-- **verification_status**: Indicates whether the borrowers income was verified by the LC or the income source was verified
-- **issue_date:** Issue date of the loan
-- **loan_status**: Current status of the loan
+- **grade**: LC assigned loan grade categorical 
+- **sub_grade**: LC assigned loan sub grade categorical 
+- **employment_length**: Employment length in years. categorical
+- **home_ownership**: The home ownership status provided by the borrower categorical 
+- **annual_inc**: The annual income of the borrower float 
+- **verification_status**: Indicates whether the borrowers income was verified by the LC or the income source was verified categorical 
+- **issue_date:** Issue date of the loan datetime 
+- **loan_status**: Current status of the loan categorical 
 - **payment_plan**: Indicates if a payment plan is in place for the loan. Indication borrower is struggling to pay.
 - **purpose**: A category provided by the borrower for the loan request.
 - **dti**: A ratio calculated using the borrowerâ€™s total monthly debt payments on the total debt obligations, excluding mortgage and the requested LC loan, divided by the borrowerâ€™s self-reported monthly income.
@@ -41,15 +41,25 @@
 - **policy_code**: publicly available policy_code=1 new products not publicly available policy_code=2
 - **application_type**: Indicates whether the loan is an individual application or a joint application with two co-borrowers
 
-Numerical
 
-INT -    id, member_id, loan_amount, funded_amount_inv, annual_inc, delinq_2yrs, inq_last_6mths,mths_since_last_delinq, mths_since_last_record,open_accounts, total_accounts,collections_12_ex_med,mths_since,last_major_derog,policy_code
+- **Float**
+float_columns = ['loan_amount','funded_amount','funded_amount_inv','int_rate','instalment','annual_inc','dti','out_prncp','out_prncp_inv','total_payment','total_payment_inv','total_rec_prncp','total_rec_int','total_rec_late_fee','recoveries','collection_recovery_fee','last_payment_amount']
 
-FLOAT - int_rate, instalment,dti, out_prncp, total_payment_inv,total_rec_prncp,total_rec_int,total_rec_late_fees,recoveries,collection_recovery_fee ,last_payment_amount
-
-
-Categorical 
-Ordered - term, grade, sub_grade, employment_length
+- **Category**
+['term','grade','sub_grade','employment_length']
 
 
-Date = issue_date, earliest_credit_line,last_payment_date,, last_credit_pull_date
+- **Integer**
+integer_columns = ['delinq_2yrs','inq_last_6mths','open_accounts','total_accounts','inq_last_6mths','collections_12_mths_ex_med','policy_code']
+
+
+- **Object**
+object_columns = ['home_ownership','verification_status','loan_status','payment_plan','purpose','application_type']
+
+- **Date**
+['issue_date','earliest_credit_line','last_payment_date','last_credit_pull_date']
+
+
+
+- **Removed**
+mths_since_last_delinq, 'mths_since_last_record', 'next_payment_date', 'mths_since_last_major_derog'

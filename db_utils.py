@@ -52,13 +52,23 @@ class DataFrameTransform:
         
     def _convert_to_datetime(df, date_columns):
         for col in date_columns:
-            df[col] = pd.to_datetime(df[col], format='%b-%Y', errors='coerce')
+            try:
+                # convert using the standard date format
+                df[col] = pd.to_datetime(df[col])
+            except ValueError:
+                try: 
+                    # convert using a specific format if standard conversion fails
+                    df[col] = pd.to_datetime(df[col], format='%Y-%m')
+                except ValueError:
+                    # If specific format also fails, print error
+                    print(f"Column {col} cannot be converted to datetime")
+
             
     def drop_rows_date_columns(df):
-        date_columns = ['issue_date', 'earliest_credit_line', 'last_payment_date', "last_credit_pull_date"]
-        for col in date_columns:
-            df_copy = df.drop('column_to_drop', axis=1).copy()       
-            return df_copy
+        date_columns = ['issue_date', 'earliest_credit_line', 'last_payment_date', 'last_credit_pull_date']
+        df_copy = df.drop(date_columns, axis=1).copy()
+        return df_copy
+
             
     def _extract_numeric_and_convert(df, column, pattern):
         df[column] = df[column].str.extract(pattern).astype(float)
@@ -81,6 +91,21 @@ class DataFrameTransform:
                 df[col] = np.log1p(df[col])
             else:
                 df[col] = np.sign(df[col]) * np.log1p(abs(df[col]))
+   
+    def convert_to_object(df, column_name):
+        df[column_name] = df[column_name].astype('object')
+    
+    def convert_to_float(df, column_name):
+        df[column_name] = pd.to_numeric(df[column_name], errors='coerce').astype(float)
+        return df
+
+    def convert_to_int(df, column_name):
+        df[column_name] = pd.to_numeric(df[column_name], errors='coerce').astype(int)
+        return df
+
+    def convert_to_category(df, column_name):
+        df[column_name] = df[column_name].astype('category')
+
                 
 #%% 
 class NullPercentageCalculator:
@@ -123,7 +148,7 @@ class NullPercentageCalculator:
                     null_percentage = df[col].isnull().mean()
                     if null_percentage > threshold:
                         df.dropna(subset=[col], inplace=True)
-
+            return df 
 
 
 #%%
@@ -145,8 +170,13 @@ class DataFrameInfo:
 
     
     # Any other custom methods or EDA tasks can be added here
+    #%%
+
+# Add more functions as needed for additional data types...
+
+        
 #%%
-class Plotter:                        
+class Plotter:                         
 
     def show_matrix_before(df):
         msno.matrix(df)
