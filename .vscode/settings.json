@@ -1,0 +1,5 @@
+{
+    "git.ignoreLimitWarning": true,
+    "notebook.output.scrolling": true,
+    "notebook.output.textLineLimit": 100
+}
