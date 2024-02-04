@@ -63,7 +63,6 @@ def calculate_projected_loss(df):
     plt.grid(True)
     plt.show()
 
-    return projected_loss
 
 def plot_possible_indicators(df):
     grouped_data = df.groupby(['purpose', 'loan_status']).size().unstack(fill_value=0)
